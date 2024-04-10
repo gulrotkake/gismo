@@ -1,0 +1,15 @@
+.Panel {
+    box-sizing: border-box;
+    border: 1vh solid black;
+    border-right: none;
+    
+    & > h1 {
+        margin:0;
+        background-color: var(--primary-background-2);
+        vertical-align: middle;
+        padding: 4px 12px 0px 12px;
+        font-size: 1.2em;
+        line-height: 1.6em;
+        font-weight: 100;
+    }
+}

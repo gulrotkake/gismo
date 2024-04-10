@@ -1,0 +1,52 @@
+:root {
+    --primary-blue: hsl(200, 100%, 50%);
+    --primary-orange: hsl(40, 100%, 50%);
+    --primary-background: #333;
+    --primary-background-1: #444;
+    --primary-background-2: #555;
+    --primary-foreground: #fafafa;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background-color: var(--primary-background);
+    color: var(--primary-foreground);
+    font-family: sans-serif;
+}
+
+.w100 {
+    width: 100%;
+}
+
+.h100 {
+    height: 100%;
+}
+
+.vh100 {
+    height: 100vh;
+}
+
+.vw30 {
+    width: 30vw;
+}
+
+.scroll-y {
+    overflow-y: scroll;
+}
+
+.bg-blue {
+    background-color: var(--primary-blue);
+}
+
+.grid-4-rows {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr auto 1fr;
+}
+
+.flex-columns {
+    display: flex;
+    flex-direction: row;
+}

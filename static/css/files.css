@@ -1,0 +1,25 @@
+.Files {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    height: 100%;
+    font-family: monospace;
+
+    > li {
+        line-height: 16pt;
+        text-indent: 12px;
+
+        &:nth-child(odd) {
+            background-color: var(--primary-background-1);
+        }
+    }
+
+    > li:hover {
+        background-color: var(--primary-orange);
+    }
+
+    > li.selected {
+        background-color: var(--primary-blue);
+    }
+}
+
