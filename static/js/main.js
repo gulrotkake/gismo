@@ -3,7 +3,32 @@ import { useRef, useState, useEffect } from 'preact/hooks';
 import { useSignal, useSignalEffect } from '@preact/signals';
 import { html } from 'htm/preact';
 import { Dag } from './dag.js';
-import { editDistance, toGeoJSON, osrm } from './utils.js';
+import { nearestPointIndex, editDistance, toGeoJSON, osrm } from './utils.js';
+
+const SplitMode = {
+    onSetup: () => {},
+    onClick: function(state, e) {
+        if (e.featureTarget) {
+            this.map.fire('draw.cut', {
+                feature: e.featureTarget,
+                lngLat: [e.lngLat.lng, e.lngLat.lat]
+            });
+            this.map.getCanvas().style.cursor = "inherit";
+            this.changeMode('simple_select');
+        }
+    },
+    toDisplayFeatures: (state, geojson, display) => display(geojson),
+    onMouseMove: function(state, e) {
+        const features = this.featuresAt(e);
+        this.map.getCanvas().style.cursor = features.length ? "crosshair" : "inherit";
+    },
+    onKeyUp: function (state, e) {
+        if (e.keyCode === 27) {
+            this.map.getCanvas().style.cursor = "inherit";
+            return this.changeMode('simple_select');
+        }
+    },
+};
 
 const Visualize = (props) => {
     const canvasRef = useRef(null);
@@ -95,6 +120,10 @@ const Map = (props) => {
             displayControlsDefault: false,
             controls: {
                 trash: true,
+            },
+            modes: {
+                ...MapboxDraw.modes,
+                split: SplitMode,
             }
         });
 
@@ -113,6 +142,13 @@ const Map = (props) => {
             props.dag.value.edit(index, edits);
         });
 
+        map.current.on('draw.cut', (e) => {
+            // Get nearest point on linestring
+            const featureIndex = draw.current.getAll().features.findIndex(feature => e.feature.properties.id === feature.id);
+            const pointIndex = nearestPointIndex(e.lngLat, draw.current.getAll().features[featureIndex].geometry.coordinates);
+            props.dag.value.split(featureIndex, pointIndex);
+        });
+
         map.current.addControl(draw.current, 'top-left');
 
         const keyboardListener = async (e) => {
@@ -128,6 +164,9 @@ const Map = (props) => {
                 const all = draw.current.getAll().features;
                 props.selectedFeatures.value = [];
                 props.dag.value.merge(draw.current.getSelectedIds().map(id => all.findIndex(feature => feature.id === id)));
+                break;
+            case 'KeyP':
+                draw.current.changeMode('split');
                 break;
             case 'KeyS':
                 localStorage.setItem(props.source.value, JSON.stringify(props.dag.value.save()));

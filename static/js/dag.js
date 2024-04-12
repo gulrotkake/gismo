@@ -142,8 +142,16 @@ export const Dag = (initialState, features) => {
     const listeners = [];
     const last = [];
     const copy = JSON.parse(JSON.stringify(features));
-    const set = (features, idx, coordinates) => {
-        features[idx].geometry.coordinates = coordinates
+
+    const split = (features, idx, pointIdx) => {
+        const splitFeature = features.features[idx].geometry.coordinates.splice(pointIdx);
+        features.features.splice(idx+1, 0, {
+            "type": "Feature",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": splitFeature
+            }
+        });
         return features;
     };
 
@@ -182,6 +190,8 @@ export const Dag = (initialState, features) => {
             switch (name) {
             case 'merge':
                 return merge(acc, args);
+            case 'split':
+                return split(acc, args.idx, args.pointIdx);
             case 'edit':
                 acc.features = acc.features.map((feature, idx) => {
                     if (idx == args.idx) {
@@ -216,6 +226,16 @@ export const Dag = (initialState, features) => {
                 args: {
                     idx: idx,
                     edit: edits
+                }
+            });
+            update();
+        },
+        split: (idx, pointIdx) => {
+            ops.push({
+                name: 'split',
+                args: {
+                    idx,
+                    pointIdx
                 }
             });
             update();
