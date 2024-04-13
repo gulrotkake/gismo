@@ -69,7 +69,7 @@ const Map = (props) => {
         const dag = props.dag.value;
         return dag.onUpdate(result => {
             const all = draw.current.getAll().features;
-            const selected = all.length === result.features.length || lastSource.current === props.source.value
+            const selected = all.length === result.features.length && lastSource.current === props.source.value
                   ? draw.current.getSelectedIds().map(id => all.findIndex(feature => feature.id === id))
                   : [];
             draw.current.set(result);
