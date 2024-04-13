@@ -58,13 +58,7 @@ const renderDag = (ctx, rootName, initialFeatures, ops, highlight) => {
     const w = ctx.canvas.clientWidth;
     const h = ctx.canvas.clientHeight;
     const yStep = 20;
-    const colorNodes = new Set(ops.filter(op => op.name === 'merge').reduce((nodes, op) => {
-        // Remove the merge node
-        const spliced = op.args.reduce((acc, nodeIdx, count) => acc.concat(...nodes.splice(nodeIdx-count, 1)), []);
-        nodes.splice(op.args[0], 0, spliced);
-        return nodes;
-    }, initialFeatures.map((_, idx) => [idx])).filter((_, idx) => highlight.includes(idx)).flat());
-    
+
     ctx.fillStyle = '#333'
     ctx.fillRect(0, 0, w, h);
 
@@ -77,13 +71,11 @@ const renderDag = (ctx, rootName, initialFeatures, ops, highlight) => {
     const nodes = initialFeatures.map((_, idx, c) => ({
         x: w/(c.length*2) * (idx*2+1),
         y: sb[1] + yHeight + yStep,
-        highlight: colorNodes.has(idx),
     }));
 
     nodes.forEach((node, idx) => {
         textBox(ctx, idx, node.x, node.y, {
             radius: 8,
-            fillStyle: node.highlight? 'hsl(40, 100%, 50%)' : 'hsl(200, 100%, 50%)',
         });
         line(ctx, sb[0]+sb[2]/2, sb[1]+sb[3], node.x, node.y);
     });
@@ -95,9 +87,29 @@ const renderDag = (ctx, rootName, initialFeatures, ops, highlight) => {
             const newY = node.y + yHeight + yStep;
             textBox(ctx, 'e', node.x, newY, {
                 radius: 8,
-                fillStyle: node.highlight? 'hsl(40, 100%, 50%)' : 'hsl(200, 100%, 50%)',
             });
             line(ctx, node.x, node.y+yHeight, node.x, newY);
+            node.y = newY;
+            break;
+        }
+        case 'split': {
+            const node = nodes[op.args.idx];
+            nodes.splice(op.args.idx+1, 0, {
+                x: node.x + 32,
+                y: node.y,
+                highlight: node.highlight
+            });
+
+            const newY = node.y + yHeight + yStep;
+            textBox(ctx, op.args.idx, node.x, newY, {
+                radius: 8,
+            });
+            textBox(ctx, op.args.idx+1, nodes[op.args.idx+1].x, newY, {
+                radius: 8,
+            });
+            line(ctx, node.x, node.y+yHeight, node.x, newY);
+            line(ctx, node.x, node.y+yHeight, nodes[op.args.idx+1].x, newY);
+            nodes[op.args.idx+1].y = newY;
             node.y = newY;
             break;
         }
@@ -124,7 +136,6 @@ const renderDag = (ctx, rootName, initialFeatures, ops, highlight) => {
             // Draw box for merge
             textBox(ctx, 'm', node.x, newY, {
                 radius: 8,
-                fillStyle: node.highlight? 'hsl(40, 100%, 50%)' : 'hsl(200, 100%, 50%)',
             });
 
             // Draw line from each spliced node to merge node
@@ -146,10 +157,13 @@ export const Dag = (initialState, features) => {
     const split = (features, idx, pointIdx) => {
         const splitFeature = features.features[idx].geometry.coordinates.splice(pointIdx);
         features.features.splice(idx+1, 0, {
-            "type": "Feature",
-            "geometry": {
-                "type": "LineString",
-                "coordinates": splitFeature
+            type: "Feature",
+            properties: {
+                DistanceMeters: 0,
+            },
+            geometry: {
+                type: "LineString",
+                coordinates: splitFeature
             }
         });
         return features;
