@@ -23,6 +23,7 @@ node server.js <path-to-directory-containing-gps-data>
 
  - Ctrl-H Home position to selected feature.
  - Ctrl-M Merge two selected routes (in order of selection).
+ - Ctrl-P Partition line string, click on line string to split after entering partition mode.
  - Ctrl-Z Undo.
  - Ctrl-S Save edit DAG to local storage.
  
