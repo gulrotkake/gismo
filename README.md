@@ -18,6 +18,20 @@ node server.js <path-to-directory-containing-gps-data>
 4. Visit `http://localhost:3000`.
 
 ## Usage
+ 
+### Editing
+ 
+Select a feature in the map to move/delete features or nodes.
+
+[edit.webm](https://github.com/gulrotkake/gismo/assets/539077/78e7bd27-883a-4741-a5ca-76e067ae4407)
+
+### Merge
+
+[merge.webm](https://github.com/gulrotkake/gismo/assets/539077/00d3c89e-e91f-405a-907d-7748584944e8)
+
+### Partition
+
+[partition.webm](https://github.com/gulrotkake/gismo/assets/539077/1b3c7138-f352-4f30-a4d7-c63a6391da52)
 
 ### Keybindings
 
@@ -26,7 +40,3 @@ node server.js <path-to-directory-containing-gps-data>
  - Ctrl-P Partition line string, click on line string to split after entering partition mode.
  - Ctrl-Z Undo.
  - Ctrl-S Save edit DAG to local storage.
- 
-### Editing
- 
-Select a feature in the map to move/delete features or nodes.
