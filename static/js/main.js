@@ -94,10 +94,11 @@ const Map = (props) => {
             });
             lastSource.current = props.source.value;
             osrm(
-                map.current,
-                "osrm-source",
                 result.features.map((feature) => feature.geometry.coordinates),
-            );
+            ).then((osrmData) => {
+                map.current.getSource("osrm-source").setData(osrmData);
+                props.osrm.value = osrmData;
+            });
         });
     });
 
@@ -283,7 +284,29 @@ const Files = (props) => {
 };
 
 const Panel = (props) => {
-    return html` <div class="Panel vh100 vw30 grid-4-rows">
+    const downloadDag = () => {
+        const blob = new Blob([JSON.stringify(props.dag.value.save())], {
+            type: "application/json",
+        });
+        const el = document.createElement("a");
+        el.setAttribute("href", URL.createObjectURL(blob));
+        el.setAttribute("download", `${props.source.value}.dag.json`);
+        el.click();
+        el.remove();
+    };
+
+    const downloadOsrm = () => {
+        const blob = new Blob([JSON.stringify(props.osrm.value)], {
+            type: "application/json",
+        });
+        const el = document.createElement("a");
+        el.setAttribute("href", URL.createObjectURL(blob));
+        el.setAttribute("download", `${props.source.value}.osrm.json`);
+        el.click();
+        el.remove();
+    };
+
+    return html` <div class="Panel vh100 vw30 grid-5-rows">
         <h1>Files</h1>
         <${Files} source=${props.source} />
         <h1>Graph</h1>
@@ -292,12 +315,19 @@ const Panel = (props) => {
             source=${props.source}
             dag=${props.dag}
         />
+        ${props.source.value
+            ? html`<ul class="Buttons">
+                  <li><a onClick=${(e) => downloadDag()}>💾 DAG</a></li>
+                  <li><a onClick=${(e) => downloadOsrm()}>💾 OSRM</a></li>
+              </ul>`
+            : html`<ul class="Buttons"></ul>`}
     </div>`;
 };
 
 const App = () => {
     const source = useSignal(undefined);
     const dag = useSignal(undefined);
+    const osrm = useSignal(undefined);
     const selectedFeatures = useSignal([]);
 
     useSignalEffect(() => {
@@ -319,11 +349,13 @@ const App = () => {
             selectedFeatures=${selectedFeatures}
             source=${source}
             dag=${dag}
+            osrm=${osrm}
         />
         <${Map}
             selectedFeatures=${selectedFeatures}
             dag=${dag}
             source=${source}
+            osrm=${osrm}
         />
     </div>`;
 };

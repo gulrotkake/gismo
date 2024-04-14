@@ -41,7 +41,7 @@ export const toGeoJSON = (name, data) => ({
     },
 });
 
-export const osrm = async (map, source, points) => {
+export const osrm = async (points) => {
     const routes = await fetch("/routes", {
         method: "POST",
         headers: {
@@ -49,14 +49,12 @@ export const osrm = async (map, source, points) => {
         },
         body: JSON.stringify(points),
     }).then((res) => res.json());
-    map.getSource(source).setData(
-        toGeoJSON(
-            "snap",
-            routes.flatMap((route) =>
-                route.matchings.map((match) => match.geometry.coordinates),
-            ),
-        ).data,
-    );
+    return toGeoJSON(
+        "snap",
+        routes.flatMap((route) =>
+            route.matchings.map((match) => match.geometry.coordinates),
+        ),
+    ).data;
 };
 
 export const editDistance = (sourceCoordinates, targetCoordinates) => {

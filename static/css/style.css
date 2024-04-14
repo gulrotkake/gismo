@@ -40,10 +40,10 @@ html, body {
     background-color: var(--primary-blue);
 }
 
-.grid-4-rows {
+.grid-5-rows {
     display: grid;
     grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr auto 1fr;
+    grid-template-rows: auto 1fr auto 1fr auto;
 }
 
 .flex-columns {
