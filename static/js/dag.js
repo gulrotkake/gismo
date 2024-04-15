@@ -60,9 +60,51 @@ const renderDag = (ctx, rootName, initialFeatures, ops, highlight) => {
         return [cx - dim.width / 2 - 8, y, dim.width + 16, height + 16];
     };
 
+    const depth =
+        2 +
+        Math.max(
+            ...ops.reduce(
+                (nodes, op) => {
+                    switch (op.name) {
+                        case "edit":
+                            nodes[op.args.idx] += 1;
+                            break;
+                        case "merge":
+                            // Remove the merge node
+                            const merged = [...op.args].sort();
+                            const spliceDepth = merged.reduce(
+                                (acc, nodeIdx, count) =>
+                                    Math.max(
+                                        nodes.splice(nodeIdx - count, 1)[0],
+                                        acc,
+                                    ),
+                                0,
+                            );
+                            nodes.splice(merged[0], 0, spliceDepth + 1);
+                            break;
+                        case "split":
+                            const node = nodes[op.args.idx];
+                            nodes.splice(
+                                op.args.idx + 1,
+                                0,
+                                nodes[op.args.idx],
+                            );
+                            nodes[op.args.idx] += 1;
+                            break;
+                    }
+                    return nodes;
+                },
+                initialFeatures.map((_, idx) => 0),
+            ),
+        );
+
     const w = ctx.canvas.clientWidth;
     const h = ctx.canvas.clientHeight;
     const yStep = 20;
+    const calcHeight = depth * (32 + yStep);
+    if (calcHeight > h) {
+        ctx.scale(1, h / calcHeight);
+    }
 
     ctx.fillStyle = "#333";
     ctx.fillRect(0, 0, w, h);
