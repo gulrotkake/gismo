@@ -264,6 +264,36 @@ const Files = (props) => {
             .then((json) => setFiles(json.reverse()));
     }, []);
 
+    useEffect(() => {
+        const keyboardListener = (e) => {
+            if (!selectedFile) return;
+            const isMapElement = (e.srcElement || e.target).classList.contains(
+                "Files",
+            );
+            console.log(e);
+            switch (e.code) {
+                case "ArrowUp": {
+                    const idx = files.indexOf(selectedFile);
+                    if (idx > 0) {
+                        select(files[idx - 1]);
+                    }
+                    e.preventDefault();
+                    break;
+                }
+                case "ArrowDown": {
+                    const idx = files.indexOf(selectedFile);
+                    if (idx > 0 && idx < files.length - 1) {
+                        select(files[idx + 1]);
+                    }
+                    e.preventDefault();
+                    break;
+                }
+            }
+        };
+        document.addEventListener("keyup", keyboardListener);
+        return () => document.removeEventListener("keyup", keyboardListener);
+    }, [selectedFile]);
+
     return files.length > 0
         ? html`<ul class="Files h100 scroll-y">
               ${files.map((file) =>
